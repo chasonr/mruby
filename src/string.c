@@ -2919,6 +2919,49 @@ mrb_str_byteslice(mrb_state *mrb, mrb_value str)
   }
 }
 
+#ifdef MRB_BIGNUM_INTEGRATION
+/* Conversion of large Integer constant deferred until runtime.  This method is
+   a hook for a gem that implements Bignum.  The name "to_big" notwithstanding,
+   it returns a Float unless overridden. */
+static mrb_value
+mrb_str_to_big(mrb_state *mrb, mrb_value str)
+{
+  const char *p = RSTRING_PTR(str);
+  const char *e = p + RSTRING_LEN(str);
+  double f = 0;
+  mrb_bool neg = FALSE;
+  mrb_int base = 10;
+
+  mrb_get_args(mrb, "|i", &base);
+  if (base < 2 || 36 < base) {
+    mrb_raisef(mrb, E_ARGUMENT_ERROR, "illegal radix %S", mrb_fixnum_value(base));
+  }
+
+  /* Process sign */
+  if (p < e && (*p == '+' || *p == '-')) {
+    neg = *p == '-';
+    ++p;
+  }
+
+  while (p < e) {
+    char c = *p;
+    const char *n;
+    c = tolower((unsigned char)c);
+    n = strchr(mrb_digitmap, c);
+    if (n == NULL || c == '\0') {
+      break;
+    }
+    f *= base;
+    f += n - mrb_digitmap;
+    p++;
+  }
+  if (neg) {
+    f = -f;
+  }
+  return mrb_float_value(mrb, f);
+}
+#endif
+
 /* ---------------------------*/
 void
 mrb_init_string(mrb_state *mrb)
@@ -2980,6 +3023,10 @@ mrb_init_string(mrb_state *mrb)
   mrb_define_method(mrb, s, "getbyte",         mrb_str_getbyte,         MRB_ARGS_REQ(1));
   mrb_define_method(mrb, s, "setbyte",         mrb_str_setbyte,         MRB_ARGS_REQ(2));
   mrb_define_method(mrb, s, "byteslice",       mrb_str_byteslice,       MRB_ARGS_ARG(1,1));
+
+#ifdef MRB_BIGNUM_INTEGRATION
+  mrb_define_method(mrb, s, "to_big",          mrb_str_to_big,          MRB_ARGS_OPT(1));
+#endif
 }
 
 #ifndef MRB_WITHOUT_FLOAT
