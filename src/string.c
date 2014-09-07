@@ -2725,6 +2725,49 @@ mrb_str_bytes(mrb_state *mrb, mrb_value str)
   return a;
 }
 
+#ifdef MRB_BIGNUM_INTEGRATION
+/* Conversion of large Integer constant deferred until runtime.  This method is
+   a hook for a gem that implements Bignum.  The name "to_big" notwithstanding,
+   it returns a Float unless overridden. */
+static mrb_value
+mrb_str_to_big(mrb_state *mrb, mrb_value str)
+{
+  const char *p = RSTRING_PTR(str);
+  const char *e = p + RSTRING_LEN(str);
+  double f = 0;
+  mrb_bool neg = FALSE;
+  mrb_int base = 10;
+
+  mrb_get_args(mrb, "|i", &base);
+  if (base < 2 || 36 < base) {
+    mrb_raisef(mrb, E_ARGUMENT_ERROR, "illegal radix %S", mrb_fixnum_value(base));
+  }
+
+  /* Process sign */
+  if (p < e && (*p == '+' || *p == '-')) {
+    neg = *p == '-';
+    ++p;
+  }
+
+  while (p < e) {
+    char c = *p;
+    const char *n;
+    c = tolower((unsigned char)c);
+    n = strchr(mrb_digitmap, c);
+    if (n == NULL || c == '\0') {
+      break;
+    }
+    f *= base;
+    f += n - mrb_digitmap;
+    p++;
+  }
+  if (neg) {
+    f = -f;
+  }
+  return mrb_float_value(mrb, f);
+}
+#endif
+
 /* ---------------------------*/
 void
 mrb_init_string(mrb_state *mrb)
@@ -2780,6 +2823,10 @@ mrb_init_string(mrb_state *mrb)
   mrb_define_method(mrb, s, "upcase!",         mrb_str_upcase_bang,     MRB_ARGS_NONE()); /* 15.2.10.5.43 */
   mrb_define_method(mrb, s, "inspect",         mrb_str_inspect,         MRB_ARGS_NONE()); /* 15.2.10.5.46(x) */
   mrb_define_method(mrb, s, "bytes",           mrb_str_bytes,           MRB_ARGS_NONE());
+
+#ifdef MRB_BIGNUM_INTEGRATION
+  mrb_define_method(mrb, s, "to_big",          mrb_str_to_big,          MRB_ARGS_OPT(1));
+#endif
 }
 
 #ifndef MRB_WITHOUT_FLOAT

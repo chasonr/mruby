@@ -110,6 +110,9 @@
 /* fixed size state atexit stack */
 //#define MRB_FIXED_STATE_ATEXIT_STACK
 
+/* Support Bignum literals (requires a Bignum gem) */
+#define MRB_BIGNUM_INTEGRATION
+
 /* -DMRB_DISABLE_XXXX to drop following features */
 //#define MRB_DISABLE_STDIO /* use of stdio */
 

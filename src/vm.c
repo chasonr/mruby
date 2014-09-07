@@ -21,6 +21,7 @@
 #include <mruby/opcode.h>
 #include "value_array.h"
 #include <mruby/throw.h>
+#include <methods.h>
 
 #ifdef MRB_DISABLE_STDIO
 #if defined(__cplusplus)
@@ -2245,6 +2246,14 @@ RETRY_TRY_BLOCK:
       int a = GETARG_A(i);
 
       /* need to check if op is overridden */
+      if (mrb_type(regs[a]) == MRB_TT_FIXNUM
+      &&  (mrb->numeric_methods & MRB_METHOD_FIXNUM_PLUS) == 0) {
+        goto L_SEND;
+      }
+      if (mrb_type(regs[a]) == MRB_TT_FLOAT
+      &&  (mrb->numeric_methods & MRB_METHOD_FLOAT_PLUS) == 0) {
+        goto L_SEND;
+      }
       switch (TYPES2(mrb_type(regs[a]),mrb_type(regs[a+1]))) {
       case TYPES2(MRB_TT_FIXNUM,MRB_TT_FIXNUM):
         {
@@ -2308,6 +2317,14 @@ RETRY_TRY_BLOCK:
       int a = GETARG_A(i);
 
       /* need to check if op is overridden */
+      if (mrb_type(regs[a]) == MRB_TT_FIXNUM
+      &&  (mrb->numeric_methods & MRB_METHOD_FIXNUM_MINUS) == 0) {
+        goto L_SEND;
+      }
+      if (mrb_type(regs[a]) == MRB_TT_FLOAT
+      &&  (mrb->numeric_methods & MRB_METHOD_FLOAT_MINUS) == 0) {
+        goto L_SEND;
+      }
       switch (TYPES2(mrb_type(regs[a]),mrb_type(regs[a+1]))) {
       case TYPES2(MRB_TT_FIXNUM,MRB_TT_FIXNUM):
         {
@@ -2366,6 +2383,14 @@ RETRY_TRY_BLOCK:
       int a = GETARG_A(i);
 
       /* need to check if op is overridden */
+      if (mrb_type(regs[a]) == MRB_TT_FIXNUM
+      &&  (mrb->numeric_methods & MRB_METHOD_FIXNUM_TIMES) == 0) {
+        goto L_SEND;
+      }
+      if (mrb_type(regs[a]) == MRB_TT_FLOAT
+      &&  (mrb->numeric_methods & MRB_METHOD_FLOAT_TIMES) == 0) {
+        goto L_SEND;
+      }
       switch (TYPES2(mrb_type(regs[a]),mrb_type(regs[a+1]))) {
       case TYPES2(MRB_TT_FIXNUM,MRB_TT_FIXNUM):
         {
@@ -2427,6 +2452,14 @@ RETRY_TRY_BLOCK:
 #endif
 
       /* need to check if op is overridden */
+      if (mrb_type(regs[a]) == MRB_TT_FIXNUM
+      &&  (mrb->numeric_methods & MRB_METHOD_FIXNUM_DIV) == 0) {
+        goto L_SEND;
+      }
+      if (mrb_type(regs[a]) == MRB_TT_FLOAT
+      &&  (mrb->numeric_methods & MRB_METHOD_FLOAT_DIV) == 0) {
+        goto L_SEND;
+      }
       switch (TYPES2(mrb_type(regs[a]),mrb_type(regs[a+1]))) {
       case TYPES2(MRB_TT_FIXNUM,MRB_TT_FIXNUM):
 #ifdef MRB_WITHOUT_FLOAT
@@ -2478,6 +2511,9 @@ RETRY_TRY_BLOCK:
       /* need to check if + is overridden */
       switch (mrb_type(regs[a])) {
       case MRB_TT_FIXNUM:
+        if ((mrb->numeric_methods & MRB_METHOD_FIXNUM_PLUS) == 0) {
+          goto L_SEND_ADDI;
+        }
         {
           mrb_int x = mrb_fixnum(regs[a]);
           mrb_int y = GETARG_C(i);
@@ -2494,6 +2530,9 @@ RETRY_TRY_BLOCK:
         break;
 #ifndef MRB_WITHOUT_FLOAT
       case MRB_TT_FLOAT:
+        if ((mrb->numeric_methods & MRB_METHOD_FLOAT_PLUS) == 0) {
+          goto L_SEND_ADDI;
+        }
 #ifdef MRB_WORD_BOXING
         {
           mrb_float x = mrb_float(regs[a]);
@@ -2504,8 +2543,14 @@ RETRY_TRY_BLOCK:
 #endif
         break;
 #endif
+      L_SEND_ADDI:
       default:
-        SET_INT_VALUE(regs[a+1], GETARG_C(i));
+        if (syms[GETARG_B(i)] == mrb_intern_lit(mrb, "-")) {
+          SET_INT_VALUE(regs[a+1], -GETARG_C(i));
+        }
+        else {
+          SET_INT_VALUE(regs[a+1], GETARG_C(i));
+        }
         i = MKOP_ABC(OP_SEND, a, GETARG_B(i), 1);
         goto L_SEND;
       }
@@ -2520,6 +2565,9 @@ RETRY_TRY_BLOCK:
       /* need to check if + is overridden */
       switch (mrb_type(regs_a[0])) {
       case MRB_TT_FIXNUM:
+        if ((mrb->numeric_methods & MRB_METHOD_FIXNUM_MINUS) == 0) {
+          goto L_SEND_SUBI;
+        }
         {
           mrb_int x = mrb_fixnum(regs_a[0]);
           mrb_int y = GETARG_C(i);
@@ -2536,6 +2584,9 @@ RETRY_TRY_BLOCK:
         break;
 #ifndef MRB_WITHOUT_FLOAT
       case MRB_TT_FLOAT:
+        if ((mrb->numeric_methods & MRB_METHOD_FLOAT_MINUS) == 0) {
+          goto L_SEND_SUBI;
+        }
 #ifdef MRB_WORD_BOXING
         {
           mrb_float x = mrb_float(regs[a]);
@@ -2546,8 +2597,14 @@ RETRY_TRY_BLOCK:
 #endif
         break;
 #endif
+      L_SEND_SUBI:
       default:
-        SET_INT_VALUE(regs_a[1], GETARG_C(i));
+        if (syms[GETARG_B(i)] == mrb_intern_lit(mrb, "+")) {
+          SET_INT_VALUE(regs[a+1], -GETARG_C(i));
+        }
+        else {
+          SET_INT_VALUE(regs[a+1], GETARG_C(i));
+        }
         i = MKOP_ABC(OP_SEND, a, GETARG_B(i), 1);
         goto L_SEND;
       }
