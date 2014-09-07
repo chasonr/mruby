@@ -1296,7 +1296,7 @@ raise_error(codegen_scope *s, const char *msg)
   genop_1(s, OP_ERR, idx);
 }
 
-#ifndef MRB_WITHOUT_FLOAT
+#if !defined(MRB_WITHOUT_FLOAT) && !defined(MRB_BIGNUM_INTEGRATION)
 static double
 readint_float(codegen_scope *s, const char *p, int base)
 {
@@ -1380,6 +1380,27 @@ gen_retval(codegen_scope *s, node *tree)
     pop();
   }
 }
+
+#ifdef MRB_BIGNUM_INTEGRATION
+static void
+make_bignum_literal(codegen_scope *s, const char *p, int base, mrb_bool neg)
+{
+  int ai = mrb_gc_arena_save(s->mrb);
+  int off, sym;
+  mrb_value lit = mrb_str_new_cstr(s->mrb, p);
+  if (neg) {
+    lit = mrb_str_cat_str(s->mrb, mrb_str_new_cstr(s->mrb, "-"), lit);
+  }
+  off = new_lit(s, lit);
+  genop(s, MKOP_ABx(OP_STRING, cursp(), off));
+  push();
+  genop(s, MKOP_AsBx(OP_LOADI, cursp(), base));
+  pop();
+  sym = new_sym(s, mrb_intern_lit(s->mrb, "to_big"));
+  genop(s, MKOP_ABC(OP_SEND, cursp(), sym, 1));
+  mrb_gc_arena_restore(s->mrb, ai);
+}
+#endif
 
 static void
 codegen(codegen_scope *s, node *tree, int val)
@@ -2396,7 +2417,12 @@ codegen(codegen_scope *s, node *tree, int val)
       mrb_bool overflow;
 
       i = readint_mrb_int(s, p, base, FALSE, &overflow);
-#ifndef MRB_WITHOUT_FLOAT
+#ifdef MRB_BIGNUM_INTEGRATION
+      if (overflow) {
+        make_bignum_literal(s, p, base, FALSE);
+      }
+      else
+#elif !defined(MRB_WITHOUT_FLOAT)
       if (overflow) {
         double f = readint_float(s, p, base);
         int off = new_lit(s, mrb_float_value(s->mrb, f));
@@ -2457,15 +2483,21 @@ codegen(codegen_scope *s, node *tree, int val)
           mrb_bool overflow;
 
           i = readint_mrb_int(s, p, base, TRUE, &overflow);
-#ifndef MRB_WITHOUT_FLOAT
+#ifdef MRB_BIGNUM_INTEGRATION
+          if (overflow) {
+            make_bignum_literal(s, p, base, TRUE);
+          }
+          else
+#elif !defined(MRB_WITHOUT_FLOAT)
           if (overflow) {
             double f = readint_float(s, p, base);
             int off = new_lit(s, mrb_float_value(s->mrb, -f));
 
             genop_2(s, OP_LOADL, cursp(), off);
           }
-          else {
+          else
 #endif
+          {
             if (i == -1) genop_1(s, OP_LOADI__1, cursp());
             else if (i >= -0xffff) {
               genop_2(s, OP_LOADINEG, cursp(), (uint16_t)-i);
@@ -2474,9 +2506,7 @@ codegen(codegen_scope *s, node *tree, int val)
               int off = new_lit(s, mrb_fixnum_value(i));
               genop_2(s, OP_LOADL, cursp(), off);
             }
-#ifndef MRB_WITHOUT_FLOAT
           }
-#endif
           push();
         }
         break;

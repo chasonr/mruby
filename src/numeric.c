@@ -1636,6 +1636,7 @@ mrb_init_numeric(mrb_state *mrb)
 
   mrb_include_module(mrb, fl, integral);
 #endif
+
   /* Use the optimizations until and unless the methods are overridden */
   mrb->numeric_methods |=
           MRB_METHOD_FIXNUM_PLUS  |
