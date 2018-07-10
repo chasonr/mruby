@@ -1301,7 +1301,8 @@ make_bignum_literal(codegen_scope *s, const char *p, int base, mrb_bool neg)
   genop(s, MKOP_ABx(OP_STRING, cursp(), off));
   push();
   genop(s, MKOP_AsBx(OP_LOADI, cursp(), base));
-  pop();
+  push_n(2);
+  pop_n(3);
   sym = new_sym(s, mrb_intern_lit(s->mrb, "to_big"));
   genop(s, MKOP_ABC(OP_SEND, cursp(), sym, 1));
   mrb_gc_arena_restore(s->mrb, ai);
