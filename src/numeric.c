@@ -16,7 +16,7 @@
 #include <mruby/numeric.h>
 #include <mruby/string.h>
 #include <mruby/class.h>
-#include <methods.h>
+#include "methods.h"
 
 #ifndef MRB_WITHOUT_FLOAT
 #ifdef MRB_USE_FLOAT

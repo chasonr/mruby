@@ -11,6 +11,7 @@
 #ifndef MRB_WITHOUT_FLOAT
 #include <float.h>
 #endif
+#include <ctype.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdlib.h>
