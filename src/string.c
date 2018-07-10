@@ -12,6 +12,7 @@
 #include <float.h>
 #include <math.h>
 #endif
+#include <ctype.h>
 #include <limits.h>
 #include <stddef.h>
 #include <stdlib.h>
