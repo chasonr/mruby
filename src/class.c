@@ -479,6 +479,36 @@ mrb_define_method_raw(mrb_state *mrb, struct RClass *c, mrb_sym mid, mrb_method_
         mrb->numeric_methods &= ~MRB_METHOD_FLOAT_DIV;
     }
   }
+
+  /* Clear flag for optimized numeric method */
+  if (c == mrb->fixnum_class) {
+    if (mid == mrb_intern_lit(mrb, "+")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FIXNUM_PLUS;
+    }
+    else if (mid == mrb_intern_lit(mrb, "-")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FIXNUM_MINUS;
+    }
+    else if (mid == mrb_intern_lit(mrb, "*")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FIXNUM_TIMES;
+    }
+    else if (mid == mrb_intern_lit(mrb, "/")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FIXNUM_DIV;
+    }
+  }
+  else if (c == mrb->float_class) {
+    if (mid == mrb_intern_lit(mrb, "+")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FLOAT_PLUS;
+    }
+    else if (mid == mrb_intern_lit(mrb, "-")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FLOAT_MINUS;
+    }
+    else if (mid == mrb_intern_lit(mrb, "*")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FLOAT_TIMES;
+    }
+    else if (mid == mrb_intern_lit(mrb, "/")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FLOAT_DIV;
+    }
+  }
 }
 
 MRB_API void
