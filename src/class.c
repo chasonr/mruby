@@ -15,7 +15,7 @@
 #include <mruby/error.h>
 #include <mruby/data.h>
 #include <mruby/istruct.h>
-#include <methods.h>
+#include "methods.h"
 
 KHASH_DEFINE(mt, mrb_sym, mrb_method_t, TRUE, kh_int_hash_func, kh_int_hash_equal)
 
