@@ -2520,10 +2520,10 @@ RETRY_TRY_BLOCK:
 #endif
       L_SEND_ADDI:
       default:
-        if (syms[GETARG_B(i)] == mrb_intern_lit(mrb, "-")) {
+        /*temp if (syms[GETARG_B(i)] == mrb_intern_lit(mrb, "-")) {
           SET_INT_VALUE(regs[a+1], -b);
         }
-        else {
+        else*/ {
           SET_INT_VALUE(regs[a+1], b);
         }
         c = 1;
@@ -2573,10 +2573,10 @@ RETRY_TRY_BLOCK:
 #endif
       L_SEND_SUBI:
       default:
-        if (syms[GETARG_B(i)] == mrb_intern_lit(mrb, "+")) {
+        /*temp if (syms[GETARG_B(i)] == mrb_intern_lit(mrb, "+")) {
           SET_INT_VALUE(regs_a[1], -b);
         }
-        else {
+        else*/ {
           SET_INT_VALUE(regs_a[1], b);
         }
         c = 1;
