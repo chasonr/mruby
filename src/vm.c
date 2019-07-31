@@ -1002,6 +1002,7 @@ check_target_class(mrb_state *mrb)
 
 void mrb_hash_check_kdict(mrb_state *mrb, mrb_value self);
 
+/*@@@*/
 MRB_API mrb_value
 mrb_vm_exec(mrb_state *mrb, struct RProc *proc, mrb_code *pc)
 {
@@ -1387,6 +1388,7 @@ RETRY_TRY_BLOCK:
       goto L_SENDB;
     };
 
+/*@@@*/
     CASE(OP_SEND, BBB)
     L_SEND:
     {
@@ -2226,11 +2228,15 @@ RETRY_TRY_BLOCK:
       /* need to check if op is overridden */
       if (mrb_type(regs[a]) == MRB_TT_FIXNUM
       &&  (mrb->numeric_methods & MRB_METHOD_FIXNUM_PLUS) == 0) {
-        goto L_SEND;
+        c = 1;
+        mid = mrb_intern_lit(mrb, "+");
+        goto L_SEND_SYM;
       }
       if (mrb_type(regs[a]) == MRB_TT_FLOAT
       &&  (mrb->numeric_methods & MRB_METHOD_FLOAT_PLUS) == 0) {
-        goto L_SEND;
+        c = 1;
+        mid = mrb_intern_lit(mrb, "+");
+        goto L_SEND_SYM;
       }
       switch (TYPES2(mrb_type(regs[a]),mrb_type(regs[a+1]))) {
       case TYPES2(MRB_TT_FIXNUM,MRB_TT_FIXNUM):
@@ -2296,11 +2302,15 @@ RETRY_TRY_BLOCK:
       /* need to check if op is overridden */
       if (mrb_type(regs[a]) == MRB_TT_FIXNUM
       &&  (mrb->numeric_methods & MRB_METHOD_FIXNUM_MINUS) == 0) {
-        goto L_SEND;
+        c = 1;
+        mid = mrb_intern_lit(mrb, "-");
+        goto L_SEND_SYM;
       }
       if (mrb_type(regs[a]) == MRB_TT_FLOAT
       &&  (mrb->numeric_methods & MRB_METHOD_FLOAT_MINUS) == 0) {
-        goto L_SEND;
+        c = 1;
+        mid = mrb_intern_lit(mrb, "-");
+        goto L_SEND_SYM;
       }
       switch (TYPES2(mrb_type(regs[a]),mrb_type(regs[a+1]))) {
       case TYPES2(MRB_TT_FIXNUM,MRB_TT_FIXNUM):
@@ -2361,11 +2371,15 @@ RETRY_TRY_BLOCK:
       /* need to check if op is overridden */
       if (mrb_type(regs[a]) == MRB_TT_FIXNUM
       &&  (mrb->numeric_methods & MRB_METHOD_FIXNUM_TIMES) == 0) {
-        goto L_SEND;
+        c = 1;
+        mid = mrb_intern_lit(mrb, "*");
+        goto L_SEND_SYM;
       }
       if (mrb_type(regs[a]) == MRB_TT_FLOAT
       &&  (mrb->numeric_methods & MRB_METHOD_FLOAT_TIMES) == 0) {
-        goto L_SEND;
+        c = 1;
+        mid = mrb_intern_lit(mrb, "*");
+        goto L_SEND_SYM;
       }
       switch (TYPES2(mrb_type(regs[a]),mrb_type(regs[a+1]))) {
       case TYPES2(MRB_TT_FIXNUM,MRB_TT_FIXNUM):
@@ -2430,11 +2444,15 @@ RETRY_TRY_BLOCK:
       /* need to check if op is overridden */
       if (mrb_type(regs[a]) == MRB_TT_FIXNUM
       &&  (mrb->numeric_methods & MRB_METHOD_FIXNUM_DIV) == 0) {
-        goto L_SEND;
+        c = 1;
+        mid = mrb_intern_lit(mrb, "/");
+        goto L_SEND_SYM;
       }
       if (mrb_type(regs[a]) == MRB_TT_FLOAT
       &&  (mrb->numeric_methods & MRB_METHOD_FLOAT_DIV) == 0) {
-        goto L_SEND;
+        c = 1;
+        mid = mrb_intern_lit(mrb, "/");
+        goto L_SEND_SYM;
       }
       switch (TYPES2(mrb_type(regs[a]),mrb_type(regs[a+1]))) {
       case TYPES2(MRB_TT_FIXNUM,MRB_TT_FIXNUM):
@@ -2520,12 +2538,7 @@ RETRY_TRY_BLOCK:
 #endif
       L_SEND_ADDI:
       default:
-        /*temp if (syms[GETARG_B(i)] == mrb_intern_lit(mrb, "-")) {
-          SET_INT_VALUE(regs[a+1], -b);
-        }
-        else*/ {
-          SET_INT_VALUE(regs[a+1], b);
-        }
+        SET_INT_VALUE(regs[a+1], b);
         c = 1;
         mid = mrb_intern_lit(mrb, "+");
         goto L_SEND_SYM;
@@ -2573,12 +2586,7 @@ RETRY_TRY_BLOCK:
 #endif
       L_SEND_SUBI:
       default:
-        /*temp if (syms[GETARG_B(i)] == mrb_intern_lit(mrb, "+")) {
-          SET_INT_VALUE(regs_a[1], -b);
-        }
-        else*/ {
-          SET_INT_VALUE(regs_a[1], b);
-        }
+        SET_INT_VALUE(regs_a[1], b);
         c = 1;
         mid = mrb_intern_lit(mrb, "-");
         goto L_SEND_SYM;
