@@ -1421,13 +1421,13 @@ make_bignum_literal(codegen_scope *s, const char *p, int base, mrb_bool neg)
     lit = mrb_str_cat_str(s->mrb, mrb_str_new_cstr(s->mrb, "-"), lit);
   }
   off = new_lit(s, lit);
-  genop(s, MKOP_ABx(OP_STRING, cursp(), off));
+  genop_2(s, OP_STRING, cursp(), off);
   push();
-  genop(s, MKOP_AsBx(OP_LOADI, cursp(), base));
+  genop_2(s, OP_LOADI, cursp(), base);
   push_n(2);
   pop_n(3);
   sym = new_sym(s, mrb_intern_lit(s->mrb, "to_big"));
-  genop(s, MKOP_ABC(OP_SEND, cursp(), sym, 1));
+  genop_3(s, OP_SEND, cursp(), sym, 1);
   mrb_gc_arena_restore(s->mrb, ai);
 }
 #endif
