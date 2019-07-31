@@ -1002,7 +1002,6 @@ check_target_class(mrb_state *mrb)
 
 void mrb_hash_check_kdict(mrb_state *mrb, mrb_value self);
 
-/*@@@*/
 MRB_API mrb_value
 mrb_vm_exec(mrb_state *mrb, struct RProc *proc, mrb_code *pc)
 {
@@ -1388,7 +1387,6 @@ RETRY_TRY_BLOCK:
       goto L_SENDB;
     };
 
-/*@@@*/
     CASE(OP_SEND, BBB)
     L_SEND:
     {
