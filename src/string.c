@@ -2714,6 +2714,7 @@ mrb_str_bytes(mrb_state *mrb, mrb_value str)
 static mrb_value
 mrb_str_to_big(mrb_state *mrb, mrb_value str)
 {
+#ifndef MRB_WITHOUT_FLOAT
   const char *p = RSTRING_PTR(str);
   const char *e = p + RSTRING_LEN(str);
   double f = 0;
@@ -2747,6 +2748,9 @@ mrb_str_to_big(mrb_state *mrb, mrb_value str)
     f = -f;
   }
   return mrb_float_value(mrb, f);
+#else
+  return mrb_fixnum_value(0);
+#endif
 }
 #endif
 

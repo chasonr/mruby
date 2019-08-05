@@ -478,6 +478,7 @@ mrb_define_method_raw(mrb_state *mrb, struct RClass *c, mrb_sym mid, mrb_method_
         mrb->numeric_methods &= ~MRB_METHOD_FIXNUM_DIV;
     }
   }
+#ifndef MRB_WITHOUT_FLOAT
   else if (c == mrb->float_class) {
     if (mid == mrb_intern_lit(mrb, "+")) {
         mrb->numeric_methods &= ~MRB_METHOD_FLOAT_PLUS;
@@ -492,6 +493,7 @@ mrb_define_method_raw(mrb_state *mrb, struct RClass *c, mrb_sym mid, mrb_method_
         mrb->numeric_methods &= ~MRB_METHOD_FLOAT_DIV;
     }
   }
+#endif
 }
 
 MRB_API void
