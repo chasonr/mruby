@@ -17,7 +17,6 @@
 #include <mruby/numeric.h>
 #include <mruby/string.h>
 #include <mruby/class.h>
-#include "methods.h"
 
 #ifndef MRB_WITHOUT_FLOAT
 #ifdef MRB_USE_FLOAT
@@ -1686,15 +1685,4 @@ mrb_init_numeric(mrb_state *mrb)
 
   mrb_include_module(mrb, fl, integral);
 #endif
-
-  /* Use the optimizations until and unless the methods are overridden */
-  mrb->numeric_methods |=
-          MRB_METHOD_FIXNUM_PLUS  |
-          MRB_METHOD_FIXNUM_MINUS |
-          MRB_METHOD_FIXNUM_TIMES |
-          MRB_METHOD_FIXNUM_DIV   |
-          MRB_METHOD_FLOAT_PLUS   |
-          MRB_METHOD_FLOAT_MINUS  |
-          MRB_METHOD_FLOAT_TIMES  |
-          MRB_METHOD_FLOAT_DIV    ;
 }
