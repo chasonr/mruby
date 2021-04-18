@@ -18,6 +18,7 @@
 #include <mruby/istruct.h>
 #include <mruby/opcode.h>
 #include <mruby/presym.h>
+#include "methods.h"
 
 union mt_ptr {
   struct RProc *proc;
@@ -755,6 +756,38 @@ mrb_define_method_raw(mrb_state *mrb, struct RClass *c, mrb_sym mid, mrb_method_
   }
   mt_put(mrb, h, mid, MRB_METHOD_FUNC_P(m), MRB_METHOD_NOARG_P(m), ptr);
   mc_clear(mrb);
+
+  /* Clear flag for optimized numeric method */
+  if (c == mrb->integer_class) {
+    if (mid == mrb_intern_lit(mrb, "+")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FIXNUM_add;
+    }
+    else if (mid == mrb_intern_lit(mrb, "-")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FIXNUM_sub;
+    }
+    else if (mid == mrb_intern_lit(mrb, "*")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FIXNUM_mul;
+    }
+    else if (mid == mrb_intern_lit(mrb, "/")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FIXNUM_div;
+    }
+  }
+#ifndef MRB_WITHOUT_FLOAT
+  else if (c == mrb->float_class) {
+    if (mid == mrb_intern_lit(mrb, "+")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FLOAT_add;
+    }
+    else if (mid == mrb_intern_lit(mrb, "-")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FLOAT_sub;
+    }
+    else if (mid == mrb_intern_lit(mrb, "*")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FLOAT_mul;
+    }
+    else if (mid == mrb_intern_lit(mrb, "/")) {
+        mrb->numeric_methods &= ~MRB_METHOD_FLOAT_div;
+    }
+  }
+#endif
 }
 
 MRB_API void

@@ -25,6 +25,7 @@
 #include <mruby/throw.h>
 #include <mruby/dump.h>
 #include <mruby/presym.h>
+#include "methods.h"
 
 #ifdef MRB_NO_STDIO
 #if defined(__cplusplus)
@@ -2351,6 +2352,11 @@ RETRY_TRY_BLOCK:
   NEXT;
 #define OP_MATH_CASE_INTEGER(op_name)                                       \
   case TYPES2(MRB_TT_INTEGER, MRB_TT_INTEGER):                              \
+    if ((mrb->numeric_methods & MRB_METHOD_FIXNUM_##op_name) == 0) {        \
+      c = 1;                                                                \
+      mid = MRB_OPSYM(op_name);                                             \
+      goto L_SEND_SYM;                                                      \
+    }                                                                       \
     {                                                                       \
       mrb_int x = mrb_integer(regs[a]), y = mrb_integer(regs[a+1]), z;      \
       if (mrb_int_##op_name##_overflow(x, y, &z))                           \
@@ -2364,6 +2370,11 @@ RETRY_TRY_BLOCK:
 #else
 #define OP_MATH_CASE_FLOAT(op_name, t1, t2)                                     \
   case TYPES2(OP_MATH_TT_##t1, OP_MATH_TT_##t2):                                \
+    if ((mrb->numeric_methods & MRB_METHOD_FLOAT_##op_name) == 0) {             \
+      c = 1;                                                                    \
+      mid = MRB_OPSYM(op_name);                                                 \
+      goto L_SEND_SYM;                                                          \
+    }                                                                           \
     {                                                                           \
       mrb_float z = mrb_##t1(regs[a]) OP_MATH_OP_##op_name mrb_##t2(regs[a+1]); \
       SET_FLOAT_VALUE(mrb, regs[a], z);                                         \
@@ -2402,6 +2413,18 @@ RETRY_TRY_BLOCK:
 #endif
 
       /* need to check if op is overridden */
+      if (mrb_type(regs[a]) == MRB_TT_FIXNUM
+      &&  (mrb->numeric_methods & MRB_METHOD_FIXNUM_div) == 0) {
+        c = 1;
+        mid = MRB_OPSYM(div);
+        goto L_SEND_SYM;
+      }
+      if (mrb_type(regs[a]) == MRB_TT_FLOAT
+      &&  (mrb->numeric_methods & MRB_METHOD_FLOAT_div) == 0) {
+        c = 1;
+        mid = MRB_OPSYM(div);
+        goto L_SEND_SYM;
+      }
       switch (TYPES2(mrb_type(regs[a]),mrb_type(regs[a+1]))) {
       case TYPES2(MRB_TT_INTEGER,MRB_TT_INTEGER):
         {

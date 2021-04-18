@@ -18,6 +18,7 @@
 #include <mruby/string.h>
 #include <mruby/class.h>
 #include <mruby/presym.h>
+#include "methods.h"
 
 #ifndef MRB_NO_FLOAT
 #ifdef MRB_USE_FLOAT32
@@ -1846,4 +1847,15 @@ mrb_init_numeric(mrb_state *mrb)
   mrb_define_const_id(mrb, fl, MRB_SYM(NAN), mrb_float_value(mrb, NAN));
 #endif
 #endif
+
+  /* Use the optimizations until and unless the methods are overridden */
+  mrb->numeric_methods |=
+          MRB_METHOD_FIXNUM_add |
+          MRB_METHOD_FIXNUM_sub |
+          MRB_METHOD_FIXNUM_mul |
+          MRB_METHOD_FIXNUM_div |
+          MRB_METHOD_FLOAT_add  |
+          MRB_METHOD_FLOAT_sub  |
+          MRB_METHOD_FLOAT_mul  |
+          MRB_METHOD_FLOAT_div  ;
 }

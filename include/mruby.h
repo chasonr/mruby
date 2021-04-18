@@ -297,6 +297,8 @@ typedef struct mrb_state {
   mrb_atexit_func *atexit_stack;
 #endif
   uint16_t atexit_stack_len;
+
+  uint16_t numeric_methods;
 } mrb_state;
 
 /**
