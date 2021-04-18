@@ -65,6 +65,8 @@ jobs:
 
   Windows-Cygwin:
     runs-on: windows-latest
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: true
     steps:
     - uses: actions/checkout@v1
     - uses: actions/cache@v1
