@@ -2475,6 +2475,12 @@ RETRY_TRY_BLOCK:
   NEXT;
 #define OP_MATHI_CASE_INTEGER(op_name)                                      \
   case MRB_TT_INTEGER:                                                      \
+    if ((mrb->numeric_methods & MRB_METHOD_FIXNUM_##op_name) == 0) {        \
+      SET_INT_VALUE(mrb,regs[a+1], b);                                      \
+      c = 1;                                                                \
+      mid = MRB_OPSYM(op_name);                                             \
+      goto L_SEND_SYM;                                                      \
+    }                                                                       \
     {                                                                       \
       mrb_int x = mrb_integer(regs[a]), y = (mrb_int)b, z;                  \
       if (mrb_int_##op_name##_overflow(x, y, &z))                           \
