@@ -1171,9 +1171,44 @@ RETRY_TRY_BLOCK:
           break;
         }
 #endif
+        {
+          char hex[18];
+          int64_t i64 = pool[b].u.i64;
+          uint64_t u64;
+          unsigned i = 0;
+          if (i64 < 0) {
+            hex[i++] = '-';
+            u64 = -(uint64_t)i64;
+          }
+          else {
+            u64 = +(uint64_t)i64;
+          }
+          unsigned j;
+          for (j = 16; j-- != 0; ) {
+            hex[i+j] = "0123456789abcdef"[u64 & 0xF];
+            u64 >>= 4;
+          }
+          hex[i+16] = '\0';
+          mrb_value str = mrb_str_new_cstr(mrb, hex);
+          if (mrb_respond_to(mrb, str, MRB_SYM(to_big))) {
+            mrb_value base = mrb_fixnum_value(16);
+            regs[a] = mrb_funcall_argv(mrb, str, MRB_SYM(to_big), 1, &base);
+            break;
+          }
+        }
         goto L_INT_OVERFLOW;
 #endif
       case IREP_TT_BIGINT:
+        {
+          const char *ptr = pool[b].u.str;
+          unsigned char plen = (unsigned char)ptr[0];
+          mrb_value base = mrb_fixnum_value((unsigned char)ptr[1]);
+          mrb_value str = mrb_str_new_static(mrb, ptr + 2, plen);
+          if (mrb_respond_to(mrb, str, MRB_SYM(to_big))) {
+            regs[a] = mrb_funcall_argv(mrb, str, MRB_SYM(to_big), 1, &base);
+            break;
+          }
+        }
         goto L_INT_OVERFLOW;
 #ifndef MRB_NO_FLOAT
       case IREP_TT_FLOAT:
