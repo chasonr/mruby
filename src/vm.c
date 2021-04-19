@@ -2342,6 +2342,12 @@ RETRY_TRY_BLOCK:
   NEXT;
 #define OP_MATHI_CASE_FIXNUM(op_name)                                       \
   case MRB_TT_FIXNUM:                                                       \
+    if ((mrb->numeric_methods & MRB_METHOD_FIXNUM_##op_name) == 0) {        \
+      SET_INT_VALUE(regs[a+1], b);                                      \
+      c = 1;                                                                \
+      mid = mrb_intern_lit(mrb, MRB_STRINGIZE(OP_MATH_OP_##op_name));       \
+      goto L_SEND_SYM;                                                      \
+    }                                                                       \
     {                                                                       \
       mrb_int x = mrb_fixnum(regs[a]), y = (mrb_int)b, z;                   \
       if (mrb_int_##op_name##_overflow(x, y, &z))                           \
